@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <title>Ideal Body Weight</title>
+    <title>GenTop - Dose Calculator</title>
 
     <link rel="stylesheet" href="lib/bootstrap-4.0.0-dist/css/bootstrap.min.css">
   </head>
@@ -14,47 +14,57 @@
       <div class="container">
         <div class="row jumbotron">
           <div class="col-12">
-            <h1>Ideal Body Weight</h1>
-            <p class="lead">This thing will require some explanation right here.</p>
+            <h2>GenTop <small class="text-muted">Dose Calculator</small></h2>
           </div>
         </div>
         <div class="row">
           <div class="col-12">
             <form action="javascript:void(0);">
-              <div class="row">
-                <div class="col">
-                  <div class="form-group">
-                    <label for="length">Length (cm)</label>
-                    <input v-model="input.length" type="text" class="form-control" id="length" aria-describedby="lengthHelp" placeholder="Enter length">
-                    <small id="lengthHelp" class="form-text text-muted">Enter your length in centimeters.</small>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="form-group">
-                    <label for="weight">Weight (kg)</label>
-                    <input v-model="input.weight" type="text" class="form-control" id="weight" aria-describedby="weightHelp" placeholder="Enter weight">
-                    <small id="weightHelp" class="form-text text-muted">Enter your weight in kilograms.</small>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="form-group">
-                    <label for="gender">Gender</label>
-                    <select v-model="input.gender" id="gender" class="form-control" aria-describedby="weightHelp">
-                      <option selected>Male</option>
-                      <option>Female</option>
-                    </select>
-                    <small id="genderHelp" class="form-text text-muted">Choose your gender.</small>
-                  </div>
-                </div>
+              <div class="form-group">
+                <label for="length">Length (cm)</label>
+                <input v-model="input.length" type="text" class="form-control" id="length" aria-describedby="lengthHelp" placeholder="Enter length">
+              </div>
+              <div class="form-group">
+                <label for="weight">Weight (kg)</label>
+                <input v-model="input.weight" type="text" class="form-control" id="weight" aria-describedby="weightHelp" placeholder="Enter weight">
+              </div>
+              <div class="form-group">
+                <label for="gender">Gender</label>
+                <select v-model="input.gender" id="gender" class="form-control" aria-describedby="genderHelp">
+                  <option>Male</option>
+                  <option>Female</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="dosage">Desired gentamicine dosage (mg/kg)</label>
+                <select v-model="input.dosage" id="dosage" class="form-control" aria-describedby="dosageHelp">
+                  <option value="3">3 mg/kg</option>
+                  <option value="5">5 mg/kg</option>
+                  <option value="6">6 mg/kg</option>
+                </select>
               </div>
             </form>
           </div>
         </div>
         <div class="row jumbotron">
           <div class="col-12 text-center">
-            <p class="lead">ideal body weight is</p>
-            <h1>{{formatNumber(ibw)}} kg</h1>
+            <p class="lead">total gentamicine dose</p>
+            <h1>{{formatNumber(dose)}} mg</h1>
           </div>
+        </div>
+        <div class="footer text-center text-muted">
+          <dl class="row">
+            <dt class="col-sm-6">ideal body weight</dt>
+            <dd class="col-sm-6">{{formatNumber(ibw)}} kg</dd>
+          </dl>
+          <dl class="row">
+            <dt class="col-sm-6">excess body weight</dt>
+            <dd class="col-sm-6">{{formatNumber(ebw)}} kg</dd>
+          </dl>
+          <dl class="row">
+            <dt class="col-sm-6">adjusted body weight</dt>
+            <dd class="col-sm-6">{{formatNumber(abw)}} kg</dd>
+          </dl>
         </div>
       </div>
     </div>
@@ -70,25 +80,41 @@
           input: {
             length: '',
             weight: '',
-            gender: 'Male',
+            gender: '',
+            dosage: '',
           },
+          dwcf: 0.4,
         },
         computed: {
-          test: function() {
-            return this.input.length + this.input.weight + this.input.gender;
+          length: function() {
+            return parseFloat(this.input.length);
+          },
+          dosage: function() {
+            return parseInt(this.input.dosage);
+          },
+          tbw: function() {
+            return parseFloat(this.input.weight);
           },
           ibw: function() {
-            var l = parseFloat(this.input.length);
-            var r = 45.4 + (0.89 * (l - 152.4));
+            var r = 45.4 + (0.89 * (this.length - 152.4));
             if (this.input.gender == "Male") r += 4.5;
-            if (isNaN(l) || r < 0) return NaN;
+            if (isNaN(this.length) || r < 0 || this.input.gender == "") return NaN;
             return r;
           },
+          ebw: function() {
+            return this.tbw - this.ibw;
+          },
+          abw: function() {
+            return this.ibw + (this.dwcf * this.ebw);
+          },
+          dose: function() {
+            return this.dosage * this.abw;
+          }
         },
         methods: {
           formatNumber: function(n) {
             if (isNaN(n)) return '-';
-            return n.toFixed(2);
+            return n.toFixed(0);
           }
         }
       });
