@@ -49,21 +49,25 @@
         <div class="row jumbotron">
           <div class="col-12 text-center">
             <p class="lead">total gentamicine dose</p>
-            <h1>{{formatNumber(dose)}} mg</h1>
+            <h1>{{formatNumber(dose,0)}} mg</h1>
           </div>
         </div>
         <div class="footer text-center text-muted">
           <dl class="row">
+            <dt class="col-sm-6">body mass index</dt>
+            <dd class="col-sm-6">{{formatNumber(bmi,1)}}</dd>
+          </dl>
+          <dl class="row">
             <dt class="col-sm-6">ideal body weight</dt>
-            <dd class="col-sm-6">{{formatNumber(ibw)}} kg</dd>
+            <dd class="col-sm-6">{{formatNumber(ibw,1)}} kg</dd>
           </dl>
           <dl class="row">
             <dt class="col-sm-6">excess body weight</dt>
-            <dd class="col-sm-6">{{formatNumber(ebw)}} kg</dd>
+            <dd class="col-sm-6">{{formatNumber(ebw,1)}} kg</dd>
           </dl>
           <dl class="row">
             <dt class="col-sm-6">adjusted body weight</dt>
-            <dd class="col-sm-6">{{formatNumber(abw)}} kg</dd>
+            <dd class="col-sm-6">{{formatNumber(abw,1)}} kg</dd>
           </dl>
         </div>
       </div>
@@ -107,14 +111,17 @@
           abw: function() {
             return this.ibw + (this.dwcf * this.ebw);
           },
+          bmi: function() {
+            return this.tbw / Math.pow(this.length/100,2);
+          },
           dose: function() {
             return this.dosage * this.abw;
-          }
+          },
         },
         methods: {
-          formatNumber: function(n) {
+          formatNumber: function(n,f) {
             if (isNaN(n)) return '-';
-            return n.toFixed(0);
+            return n.toFixed(f);
           }
         }
       });
