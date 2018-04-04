@@ -107,7 +107,7 @@
             return parseFloat(this.input.weight);
           },
           ibw: function() {
-            var r = 45.4 + (0.89 * (this.length - 152.4));
+            var r = 45.5 + (0.89 * (this.length - 152.4));
             if (this.input.gender == "Male") r += 4.5;
             if (isNaN(this.length) || r < 0 || this.input.gender == "") return NaN;
             return r;
