@@ -62,7 +62,8 @@
         <div class="row jumbotron">
           <div class="col-12 text-center">
             <p class="lead">total gentamicin dose</p>
-            <h1>{{formatNumber(dose,0)}} mg</h1>
+            <h1>{{formatNumber(dose_rounded,0)}} mg</h1>
+            <p class="text-muted" v-if="is_dose_rounded(0)">rounded from {{formatNumber(dose,0)}} mg</p>
           </div>
         </div>
         <div class="footer text-center text-muted">
@@ -103,6 +104,7 @@
             weight: '',
             gender: '',
             dosage: '',
+            dose_precision: '20',
           },
           dwcf: 0.4,
         },
@@ -134,12 +136,19 @@
           dose: function() {
             return this.dosage * this.abw;
           },
+          dose_rounded: function() {
+            var p = parseInt(this.input.dose_precision);
+            return (this.dose / p).toFixed(0) * p;
+          },
         },
         methods: {
           formatNumber: function(n,f) {
             if (isNaN(n)) return '-';
             return n.toFixed(f);
-          }
+          },
+          is_dose_rounded: function(f) {
+            return !isNaN(this.dose) && this.dose.toFixed(f) != this.dose_rounded.toFixed(f);
+          },
         }
       });
     </script>
