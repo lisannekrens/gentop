@@ -18,6 +18,11 @@
     </script>
 
     <link rel="stylesheet" href="lib/bootstrap-4.0.0-dist/css/bootstrap.min.css">
+    <style>
+      .alert {
+        margin-bottom: 5px;
+      }
+    </style>
     <link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -35,26 +40,22 @@
             <form action="javascript:void(0);">
               <div class="form-group">
                 <label for="length">Length (cm)</label>
-                <input v-model="input.length" type="text" pattern="\d*" class="form-control" id="length" aria-describedby="lengthHelp" placeholder="Enter length">
+                <input v-model="input.length" type="text" pattern="\d*" class="form-control" id="length" placeholder="Enter length">
               </div>
               <div class="form-group">
                 <label for="weight">Weight (kg)</label>
-                <input v-model="input.weight" type="text" pattern="\d*" class="form-control" id="weight" aria-describedby="weightHelp" placeholder="Enter weight">
+                <input v-model="input.weight" type="text" pattern="\d*" class="form-control" id="weight" placeholder="Enter weight">
               </div>
-              <div class="form-group">
-                <label for="gender">Gender</label>
-                <select v-model="input.gender" id="gender" class="form-control" aria-describedby="genderHelp">
-                  <option>Male</option>
-                  <option>Female</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="dosage">Desired gentamicin dosage (mg/kg)</label>
-                <select v-model="input.dosage" id="dosage" class="form-control" aria-describedby="dosageHelp">
-                  <option value="3">3 mg/kg</option>
-                  <option value="5">5 mg/kg</option>
-                  <option value="6">6 mg/kg</option>
-                </select>
+              <div class="form-group" v-for="(w,j) in params.inputs">
+                <label :for="j">{{w.name}}</label>
+                <div v-for="(v,i) in w.options">
+                  <div :class="[ (i==input[j]) ? 'alert alert-primary font-weight-bold' : 'alert alert-secondary']" v-on:click="input[j] = i">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" :name="j" :id="i" :value="i" v-model="input[j]">
+                      <label class="form-check-label" :for="v">{{v}}</label>
+                    </div>
+                  </div>
+                </div>
               </div>
             </form>
           </div>
@@ -104,9 +105,21 @@
             weight: '',
             gender: '',
             dosage: '',
-            dose_precision: '20',
           },
-          dwcf: 0.4,
+          params: {
+            dwcf: 0.4,
+            dose_precision: 20,
+            inputs: {
+              gender: {
+                name: 'Gender',
+                options: {m: 'Male',f: 'Female'},
+              },
+              dosage: {
+                name: 'Desired gentamicin dosage (mg/kg)',
+                options: {3: '3 mg/kg', 5: '5 mg/kg', 6: '6 mg/kg'},
+              },
+            },
+          },
         },
         computed: {
           length: function() {
@@ -120,7 +133,7 @@
           },
           ibw: function() {
             var r = 45.5 + (0.89 * (this.length - 152.4));
-            if (this.input.gender == "Male") r += 4.5;
+            if (this.input.gender == "m") r += 4.5;
             if (isNaN(this.length) || r < 0 || this.input.gender == "") return NaN;
             return r;
           },
@@ -128,7 +141,7 @@
             return this.tbw - this.ibw;
           },
           abw: function() {
-            return this.ibw + (this.dwcf * this.ebw);
+            return this.ibw + (this.params.dwcf * this.ebw);
           },
           bmi: function() {
             return this.tbw / Math.pow(this.length/100,2);
@@ -137,8 +150,7 @@
             return this.dosage * this.abw;
           },
           dose_rounded: function() {
-            var p = parseInt(this.input.dose_precision);
-            return (this.dose / p).toFixed(0) * p;
+            return (this.dose / this.params.dose_precision).toFixed(0) * this.params.dose_precision;
           },
         },
         methods: {
